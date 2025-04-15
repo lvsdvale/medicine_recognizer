@@ -1,6 +1,7 @@
 """the main file of the project"""
 
 from data_augmentation import DataAugmentation
+from recognizer import Recognizer
 from ultrafarma_scrapper import UltrafarmaScraper
 
 if __name__ == "__main__":
@@ -11,8 +12,9 @@ if __name__ == "__main__":
     for medicine in medicines_list:
         total += scraper.fetch_images(medicine)
     print(f"Total images downloaded: {total}")
-    """
-
     augmenter = DataAugmentation()
     summary = augmenter.augment_all_classes(num_augmented_images=40)
     print(summary)
+    """
+    recognizer = Recognizer()
+    recognizer.run()
