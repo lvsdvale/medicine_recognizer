@@ -4,9 +4,12 @@ import os
 from typing import Literal
 
 import keras
+import numpy as np
 from tensorflow.keras.layers import Conv2D, Dense, Flatten, MaxPooling2D
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.models import Sequential, load_model
+from tensorflow.keras.preprocessing import image
+from tensorflow.keras.preprocessing.image import (DirectoryIterator,
+                                                  ImageDataGenerator)
 
 
 class Recognizer:
@@ -15,7 +18,7 @@ class Recognizer:
     to recognize medicine from image datasets.
     """
 
-    def __init__(self, image_dataset: str = "medicine_databese_augmented") -> None:
+    def __init__(self, image_dataset: str = "medicine_database_augmented") -> None:
         """
         Initializes the Recognizer instance.
 
@@ -27,6 +30,7 @@ class Recognizer:
         self.__train_data = None
         self.__validation_data = None
         self.__model = None
+        self.__classes_map = None
 
     @property
     def image_dataset(self) -> str:
@@ -68,7 +72,7 @@ class Recognizer:
     @train_data.setter
     def train_data(self, train_data) -> None:
         """Sets the training data generator with validation."""
-        if not isinstance(train_data, keras.preprocessing.image.DirectoryIterator):
+        if not isinstance(train_data, DirectoryIterator):
             raise TypeError(
                 f"train_data must be DirectoryIterator, instead got {type(train_data)}"
             )
@@ -82,7 +86,7 @@ class Recognizer:
     @validation_data.setter
     def validation_data(self, validation_data) -> None:
         """Sets the validation data generator with validation."""
-        if not isinstance(validation_data, keras.preprocessing.image.DirectoryIterator):
+        if not isinstance(validation_data, DirectoryIterator):
             raise TypeError(
                 f"validation_data must be DirectoryIterator, instead got {type(validation_data)}"
             )
@@ -142,6 +146,10 @@ class Recognizer:
 
         self.train_data = train_generator
         self.validation_data = validation_generator
+        self.classes_map = {
+            class_value: class_name
+            for class_value, class_name in self.train_data.class_indices.items()
+        }
 
     @property
     def model(self) -> keras.models.Sequential:
@@ -156,6 +164,19 @@ class Recognizer:
                 f"model must be a keras.models.Sequential or None, instead got {type(model)}"
             )
         self.__model = model
+
+    @property
+    def classes_map(self) -> dict:
+        return self.__classes_map
+
+    @classes_map.setter
+    def classes_map(self, classes_map) -> None:
+        """sets class maps"""
+        if not isinstance(classes_map, dict):
+            raise TypeError(
+                f"classes map must be a dict or None, instead got {type(classes_map)}"
+            )
+        self.__classes_map = classes_map
 
     def create_model(
         self,
@@ -175,7 +196,6 @@ class Recognizer:
             Dense(units=512, activation="relu"),
             Dense(units=256, activation="relu"),
             Dense(units=128, activation="relu"),
-            Dense(units=4, activation="softmax"),
         ],
         optimizer: Literal[
             "sgd", "rmsprop", "adam", "adadelta", "adagrad", "adamax", "nadam", "ftrl"
@@ -217,6 +237,8 @@ class Recognizer:
         model = Sequential()
         for layer in layers:
             model.add(layer)
+        num_classes = self.train_data.num_classes
+        model.add(Dense(units=num_classes, activation="softmax"))
         model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
         self.model = model
 
@@ -263,3 +285,51 @@ class Recognizer:
         print("Saving model...")
         self.save_model(path=save_path)
         print("Pipeline complete!")
+
+    def predict(self, image_path: str, target_size: tuple = (256, 256)) -> str:
+        """
+        Predict the class of a new image.
+
+        Parameters:
+            image_path (str): path to the image to predict.
+            target_size (tuple): size to resize the image (default: (256, 256)).
+
+        Returns:
+            str: predicted class name.
+        """
+        if self.model is None:
+            raise ValueError(
+                "Model not created or loaded. Run create_model() or load_model() first."
+            )
+
+        if self.map is None:
+            raise ValueError(
+                "Class mapping not found. Make sure create_train_validation_data() was called."
+            )
+
+        img = image.load_img(image_path, target_size=target_size)
+        img_array = image.img_to_array(img)
+        img_array = np.expand_dims(img_array, axis=0)
+        img_array = img_array / 255.0
+
+        prediction = self.model.predict(img_array)
+        predicted_index = np.argmax(prediction)
+        predicted_class = self.map[predicted_index]
+
+        return predicted_class
+
+    def load_model(self, model_path: str) -> None:
+        """
+        Load a previously trained model from the specified file path.
+
+        Parameters:
+            model_path (str): path to the saved model file (e.g., 'model.h5').
+        """
+        try:
+            model = load_model(model_path)
+
+            self.last_model_trained = model
+            print(f"model load: {model_path}")
+
+        except Exception as e:
+            print(f"Error loading: {e}")

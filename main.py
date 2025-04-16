@@ -1,8 +1,23 @@
 """the main file of the project"""
 
+import logging
+import os
+import warnings
+
 from data_augmentation import DataAugmentation
 from recognizer import Recognizer
 from ultrafarma_scrapper import UltrafarmaScraper
+
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
+warnings.filterwarnings("ignore")
+
+import absl.logging
+
+absl.logging.set_verbosity(absl.logging.ERROR)
+
+tf_logger = logging.getLogger("tensorflow")
+tf_logger.setLevel(logging.FATAL)
 
 if __name__ == "__main__":
     """
