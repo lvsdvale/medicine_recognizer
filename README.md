@@ -75,11 +75,11 @@ python main.py
 
 ### Web Scraping
 
-You can also use the UltrafarmaScraper to download images of medicine boxes:
+You can use the UltrafarmaScraper to download images of medicine boxes:
 
 ```python
 scraper = UltrafarmaScraper()
-scraper.etch_images("search term")
+scraper.fetch_images("search term")
 ```
 
 Using the Classes
