@@ -5,6 +5,7 @@ import os
 import numpy as np
 from tensorflow.keras.preprocessing.image import (ImageDataGenerator,
                                                   img_to_array, load_img)
+from tqdm import tqdm
 
 
 class DataAugmentation:
@@ -15,13 +16,6 @@ class DataAugmentation:
     def __init__(
         self, base_dir="medicine_database", augmented_dir="medicine_database_augmented"
     ):
-        """
-        Initializes the DataAugmentation class with directories for original and augmented images.
-
-        parameters:
-            base_dir (str): Root folder where original images are stored.
-            augmented_dir (str): Root folder where augmented images will be saved.
-        """
         self.base_dir = base_dir
         self.augmented_dir = augmented_dir
         os.makedirs(self.augmented_dir, exist_ok=True)
@@ -38,13 +32,6 @@ class DataAugmentation:
     def augment_images(self, class_name, num_augmented_images=10):
         """
         Performs data augmentation on images of a given class and saves the augmented images.
-
-        parameters:
-            class_name (str): Name of the class (folder) containing images to be augmented.
-            num_augmented_images (int): Number of augmented images to generate per original image.
-
-        Returns:
-            int: Total number of augmented images generated.
         """
         class_dir = os.path.join(self.base_dir, class_name)
         augmented_class_dir = os.path.join(self.augmented_dir, class_name)
@@ -53,7 +40,9 @@ class DataAugmentation:
         image_files = [f for f in os.listdir(class_dir) if f.endswith(".jpg")]
         total_augmented_images = 0
 
-        for image_file in image_files:
+        for image_file in tqdm(
+            image_files, desc=f"Augmenting '{class_name}'", leave=False
+        ):
             img_path = os.path.join(class_dir, image_file)
             img = load_img(img_path)
             x = img_to_array(img)
@@ -73,19 +62,13 @@ class DataAugmentation:
             total_augmented_images += i
 
         print(
-            f"[✓] Generated {total_augmented_images} augmented images for class '{class_name}'."
+            f"[✓] Generated {total_augmented_images} images for class '{class_name}'."
         )
         return total_augmented_images
 
     def augment_all_classes(self, num_augmented_images=10):
         """
         Performs data augmentation on all classes found in the base directory.
-
-        parameters:
-            num_augmented_images (int): Number of augmented images to generate per original image.
-
-        Returns:
-            dict: Dictionary with class names as keys and number of augmented images generated as values.
         """
         classes = [
             d
@@ -94,10 +77,11 @@ class DataAugmentation:
         ]
         augmentation_summary = {}
 
-        for class_name in classes:
+        for class_name in tqdm(classes, desc="Augmenting all classes"):
             total_augmented_images = self.augment_images(
                 class_name, num_augmented_images
             )
             augmentation_summary[class_name] = total_augmented_images
 
+        print("[✓] Data augmentation completed for all classes.")
         return augmentation_summary
