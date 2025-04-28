@@ -1,7 +1,6 @@
 .env
 __pycache__
 .pytest_cache
-/medicine_database/
-/medicine_database_for_yolo/
+/datasets/
 .yolo-config.yaml
 *.ipynb
