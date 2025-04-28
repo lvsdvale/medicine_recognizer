@@ -61,7 +61,7 @@ To run the full pipeline for detecting medicine boxes and extracting text via OC
 ```bash
 python main.py
 ```
-##How it works:
+### How it works:
 
     Capture Video: The system starts capturing video from the default webcam.
 
