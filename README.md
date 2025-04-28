@@ -37,28 +37,32 @@ To install the necessary dependencies, run:
 
 ```bash
 pip install -r requirements.txt
+```
 
 You'll need to have Tesseract installed on your system for OCR functionality. Instructions for installation can be found here.
 
 For web scraping, the beautifulsoup4 and requests packages are used.
 
+```bash
 Model Setup
 
     YOLO Model: The YOLO model is pre-trained using the coco8.yaml dataset and can be found under the models directory as best.pt.
 
     Training the YOLO Model: To retrain the YOLO model with a custom dataset, use the following command:
 
-    yolo detect train data=coco8.yaml model=yolo11n.pt epochs=100 imgsz=640 device=mps
+    yolo detect train model=yolo11n.pt epochs=100 imgsz=640 device=mps
 
     Ultrafarma Scraper: The scraper can be used to download images of medicine boxes from Ultrafarma's website. You can use the UltrafarmaScraper class to gather images for training the YOLO model.
+```
 
-Usage
+##Usage
 
 To run the full pipeline for detecting medicine boxes and extracting text via OCR:
 
+```bash
 python main.py
-
-How it works:
+```
+##How it works:
 
     Capture Video: The system starts capturing video from the default webcam.
 
@@ -70,63 +74,39 @@ How it works:
 
     Voice Output: The cleaned text is read aloud using the voice decoder.
 
-Web Scraping
+###Web Scraping
 
 You can also use the UltrafarmaScraper to download images of medicine boxes:
 
+```python
 scraper = UltrafarmaScraper()
+scraper.etch_images("search term")
+```
 
 Using the Classes
-MedicineBoxImageCrawler
 
+```bash
+MedicineBoxImageCrawler
+```
 Use this class to fetch images of medicine boxes from Google Images.
 
+```python
 crawler = MedicineBoxImageCrawler(base_dir="medicine_images")
 crawler.fetch_data(keyword="caixa remédio", max_num=50)
 
     base_dir: Directory to save images.
 
     fetch_data(): Downloads images based on the search keyword.
-
+```
+```bash
 OCRPipeline
-
+```
 Use this class to process images and extract text using OCR.
-
+```python
 ocr = OCRPipeline()
 ocr.image_path_to_string('path/to/medicine_box_image.jpg')
 
     image_path_to_string(): Reads an image, processes it through OCR, and prints the cleaned text.
 
     processed_text_output: The cleaned OCR output after processing.
-
-UltrafarmaScraper
-
-Use this class to scrape product images from Ultrafarma's website.
-
-scraper = UltrafarmaScraper()
-scraper.fetch_images('caixa remédio')
-
-    fetch_images(): Downloads images of a specific search term (e.g., "medicine box") from the Ultrafarma website.
-
-main.py
-
-This is the entry point for running the full detection and OCR pipeline. The video feed is captured, the medicine box is detected, and the OCR pipeline is applied to extract and read aloud the text.
-Text Preprocessing
-
-In the main.py file, the process_ocr function handles image preprocessing, including:
-
-    Thresholding: Converts the image to a binary format for better OCR performance.
-
-    Sharpening: Applies a kernel filter to sharpen the image.
-
-    Text Cleaning: Filters out unnecessary or short words from the OCR result.
-
-def preprocess_image(img: np.ndarray) -> np.ndarray:
-    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-    blur = cv2.GaussianBlur(gray, (3, 3), 0)
-    sharpen_kernel = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
-    sharpened = cv2.filter2D(blur, -1, sharpen_kernel)
-    _, thresh = cv2.threshold(sharpened, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    return thresh
-
-This step helps improve OCR accuracy by removing noise and enhancing the text areas.
+```
