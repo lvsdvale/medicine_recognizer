@@ -63,15 +63,12 @@ python main.py
 ```
 ### How it works:
 
-    Capture Video: The system starts capturing video from the default webcam.
+- `Capture Video`: The system starts capturing video from the default webcam.
+- `YOLO Detection`: The YOLO model detects any medicine boxes in the video feed.
 
-    YOLO Detection: The YOLO model detects any medicine boxes in the video feed.
+- `OCR Text Extraction`: Once a box is stable for a specified number of frames, the image of the box is cropped, preprocessed, and sent through the OCR pipeline.
 
-    OCR Text Extraction: Once a box is stable for a specified number of frames, the image of the box is cropped, preprocessed, and sent through the OCR pipeline.
-
-    Text Cleaning: The extracted text is processed by removing stopwords and unnecessary characters.
-
-    Voice Output: The cleaned text is read aloud using the voice decoder.
+- `Text Cleaning`: The extracted text is processed by removing stopwords and unnecessary characters.
 
 ### Web Scraping
 
