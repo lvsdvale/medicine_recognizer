@@ -46,16 +46,15 @@ For web scraping, the beautifulsoup4 and requests packages are used.
 ```bash
 Model Setup
 
-    YOLO Model: The YOLO model is pre-trained using the coco8.yaml dataset and can be found under the models directory as best.pt.
+    YOLO Model: The YOLO model is pre-trained using the yolo-config.yaml dataset and can be found under the models directory as best.pt.
 
     Training the YOLO Model: To retrain the YOLO model with a custom dataset, use the following command:
 
     yolo detect train model=yolo11n.pt epochs=100 imgsz=640 device=mps
 
-    Ultrafarma Scraper: The scraper can be used to download images of medicine boxes from Ultrafarma's website. You can use the UltrafarmaScraper class to gather images for training the YOLO model.
 ```
 
-##Usage
+## Usage
 
 To run the full pipeline for detecting medicine boxes and extracting text via OCR:
 
@@ -74,7 +73,7 @@ python main.py
 
     Voice Output: The cleaned text is read aloud using the voice decoder.
 
-###Web Scraping
+### Web Scraping
 
 You can also use the UltrafarmaScraper to download images of medicine boxes:
 
@@ -85,9 +84,8 @@ scraper.etch_images("search term")
 
 Using the Classes
 
-```bash
-MedicineBoxImageCrawler
-```
+## MedicineBoxImageCrawler
+
 Use this class to fetch images of medicine boxes from Google Images.
 
 ```python
@@ -98,9 +96,9 @@ crawler.fetch_data(keyword="caixa remédio", max_num=50)
 
     fetch_data(): Downloads images based on the search keyword.
 ```
-```bash
-OCRPipeline
-```
+
+### OCRPipeline
+
 Use this class to process images and extract text using OCR.
 ```python
 ocr = OCRPipeline()
