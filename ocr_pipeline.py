@@ -1,10 +1,12 @@
 """This file implements a OCR class for medicine names"""
 
 import os
+import re
 from typing import Optional
 
 import cv2
 import nltk
+import numpy as np
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from pytesseract import image_to_string
@@ -82,7 +84,7 @@ class OCRPipeline:
             )
         self.__processed_text_output = processed_text_output
 
-    def preprocess_image(self, image_path: str):
+    def read_image(self, image_path: str):
         """
         Reads and converts the image to RGB format.
 
@@ -95,6 +97,25 @@ class OCRPipeline:
         image = cv2.imread(image_path)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         return image
+
+    def preprocess_image(image: np.ndarray) -> np.ndarray:
+        """
+        Preprocess the image for better OCR performance.
+
+        parameters:
+            img (np.ndarray): RGB input image.
+
+        Returns:
+            np.ndarray: Thresholded and sharpened grayscale image.
+        """
+        gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+        blur = cv2.GaussianBlur(gray, (3, 3), 0)
+        sharpen_kernel = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
+        sharpened = cv2.filter2D(blur, -1, sharpen_kernel)
+        _, thresh = cv2.threshold(
+            sharpened, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU
+        )
+        return thresh
 
     def process_output(self) -> None:
         """
@@ -109,6 +130,9 @@ class OCRPipeline:
                 if word not in stopwords_pt and word.isalnum()
             ]
             processed_text = " ".join(processed_text_without_stopwords)
+            words = re.findall(r"\b[a-zA-Záéíóúãõâêôç]{2,}\b", processed_text.lower())
+            clean_words = [w for w in words if len(w) > 3]
+            processed_text = " ".join(clean_words)
             self.processed_text_output = processed_text
 
     def image_to_string(self, image: str) -> None:
@@ -135,7 +159,7 @@ class OCRPipeline:
         Prints:
             str: The cleaned, processed OCR output.
         """
-        image = self.preprocess_image(image_path)
+        image = self.read_image(image_path)
         self.raw_text_output = image_to_string(image)
         self.process_output()
         print(self.processed_text_output)
