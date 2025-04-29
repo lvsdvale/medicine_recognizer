@@ -94,7 +94,7 @@ def test_ocr_image_to_string(mock_medication_image):
     ), "the medicine name was not found correctly"
 
 
-def test_ocr_string_to_text(mock_medication_image_path):
+def test_ocr_image_path_to_text(mock_medication_image_path):
     """test if ocr is capturing the medicine name using path as input"""
     pipeline = OCRPipeline()
     pipeline.image_path_to_string(mock_medication_image_path)
